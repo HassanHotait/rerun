@@ -9,6 +9,7 @@ use re_ui::list_item::{self, ListItemContentButtonsExt as _, PropertyContent};
 use re_ui::{UiExt as _, icons};
 use re_viewer_context::{AppContext, StoreViewContext, StoredBlobCacheKey, UiLayout};
 
+use crate::audio_ui::AudioUi;
 use crate::video_ui::VideoUi;
 use crate::{EntityDataUi, find_and_deserialize_archetype_mono_component};
 
@@ -128,6 +129,9 @@ pub struct BlobUi {
     /// Additional video ui if the blob is a video.
     video: Option<VideoUi>,
 
+    /// Additional audio ui if the blob is audio.
+    audio: Option<AudioUi>,
+
     /// The row id of the blob.
     row_id: Option<RowId>,
 
@@ -209,8 +213,11 @@ impl BlobUi {
             None
         };
 
+        let audio = AudioUi::from_blob(&blob, media_type);
+
         Self {
             video,
+            audio,
             row_id: blob_row_id,
             component: blob_component_descriptor.component,
             blob,
@@ -253,8 +260,9 @@ impl BlobUi {
         ui_layout: UiLayout,
         _entity_path: &EntityPath,
     ) {
-        if let Some(row_id) = self.row_id
+        if let (Some(row_id), Some(media_type)) = (self.row_id, self.media_type.as_ref())
             && ui_layout == UiLayout::SelectionPanel
+            && media_type.is_image()
         {
             exif_ui(
                 ui,
@@ -265,6 +273,10 @@ impl BlobUi {
 
         if let Some(video) = &self.video {
             video.data_ui(ctx, ui, ui_layout);
+        }
+
+        if let Some(audio) = &self.audio {
+            audio.data_ui(ui, ui_layout);
         }
     }
 }

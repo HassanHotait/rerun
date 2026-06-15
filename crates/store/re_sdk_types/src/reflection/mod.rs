@@ -1712,6 +1712,31 @@ fn generate_archetype_reflection() -> ArchetypeReflectionMap {
             },
         ),
         (
+            ArchetypeName::new("rerun.archetypes.AssetAudio"),
+            ArchetypeReflection {
+                display_name: "Asset audio",
+                deprecation_summary: None,
+                scope: None,
+                view_types: &["AudioView"],
+                fields: vec![
+                    ArchetypeFieldReflection {
+                        name: "blob",
+                        display_name: "Blob",
+                        component_type: "rerun.components.Blob".into(),
+                        docstring_md: "The asset's bytes.",
+                        flags: ArchetypeFieldFlags::REQUIRED,
+                    },
+                    ArchetypeFieldReflection {
+                        name: "media_type",
+                        display_name: "Media type",
+                        component_type: "rerun.components.MediaType".into(),
+                        docstring_md: "The Media Type of the asset.\n\nIf omitted, the viewer will try to guess from the data blob.\nIf it cannot guess, the asset will still be downloadable but playback may not be available.",
+                        flags: ArchetypeFieldFlags::UI_EDITABLE,
+                    },
+                ],
+            },
+        ),
+        (
             ArchetypeName::new("rerun.archetypes.AssetVideo"),
             ArchetypeReflection {
                 display_name: "Asset video",

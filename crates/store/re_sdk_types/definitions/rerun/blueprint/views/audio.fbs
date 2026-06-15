@@ -1,0 +1,7 @@
+namespace rerun.blueprint.views;
+
+/// A view of a single audio asset, for use with [archetypes.AssetAudio].
+table AudioView (
+    "attr.rerun.view_identifier": "Audio"
+) {
+}

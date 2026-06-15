@@ -70,6 +70,21 @@ impl MediaType {
     pub const MP4: &'static str = "video/mp4";
 
     // -------------------------------------------------------
+    // Audio:
+
+    /// [Waveform Audio File Format](https://en.wikipedia.org/wiki/WAV): `audio/wav`.
+    pub const WAV: &'static str = "audio/wav";
+
+    /// [MPEG audio](https://en.wikipedia.org/wiki/MP3): `audio/mpeg`.
+    pub const MPEG_AUDIO: &'static str = "audio/mpeg";
+
+    /// [Ogg audio](https://en.wikipedia.org/wiki/Ogg): `audio/ogg`.
+    pub const OGG_AUDIO: &'static str = "audio/ogg";
+
+    /// [Free Lossless Audio Codec](https://en.wikipedia.org/wiki/FLAC): `audio/flac`.
+    pub const FLAC: &'static str = "audio/flac";
+
+    // -------------------------------------------------------
     // Robotics formats:
 
     /// Rerun recording data: `application/x-rerun`.
@@ -171,6 +186,33 @@ impl MediaType {
     #[inline]
     pub fn mp4() -> Self {
         Self(Self::MP4.into())
+    }
+
+    // -------------------------------------------------------
+    // Audio:
+
+    /// `audio/wav`
+    #[inline]
+    pub fn wav() -> Self {
+        Self(Self::WAV.into())
+    }
+
+    /// `audio/mpeg`
+    #[inline]
+    pub fn mpeg_audio() -> Self {
+        Self(Self::MPEG_AUDIO.into())
+    }
+
+    /// `audio/ogg`
+    #[inline]
+    pub fn ogg_audio() -> Self {
+        Self(Self::OGG_AUDIO.into())
+    }
+
+    /// `audio/flac`
+    #[inline]
+    pub fn flac() -> Self {
+        Self(Self::FLAC.into())
     }
 
     // -------------------------------------------------------
@@ -303,6 +345,10 @@ impl MediaType {
             buf.starts_with(b"ply\n") || buf.starts_with(b"ply\r\n")
         }
 
+        fn wav_matcher(buf: &[u8]) -> bool {
+            buf.len() >= 12 && buf.starts_with(b"RIFF") && &buf[8..12] == b"WAVE"
+        }
+
         // NOTE:
         // - gltf is simply json, so no magic byte
         //   (also most gltf files contain file:// links, so not much point in sending that to
@@ -317,6 +363,7 @@ impl MediaType {
         inferer.add(Self::STL, "stl", stl_matcher);
         inferer.add(Self::DAE, "dae", dae_matcher);
         inferer.add(Self::RVL, "rvl", rvl_matcher);
+        inferer.add(Self::WAV, "wav", wav_matcher);
 
         inferer
             .get(data)
@@ -346,10 +393,14 @@ impl MediaType {
             // Special-case some where there are multiple extensions:
             Self::JPEG => Some("jpg"),
             Self::MARKDOWN => Some("md"),
+            Self::WAV => Some("wav"),
+            Self::MPEG_AUDIO => Some("mp3"),
+            Self::OGG_AUDIO => Some("ogg"),
             Self::RVL => Some("rvl"),
             Self::STL => Some("stl"),
             Self::DAE => Some("dae"),
             Self::TEXT => Some("txt"),
+            Self::FLAC => Some("flac"),
 
             // Custom MIME types not known to mime_guess2:
             Self::RRD => Some("rrd"),
@@ -373,6 +424,11 @@ impl MediaType {
     /// Returns `true` if this is an video media type.
     pub fn is_video(&self) -> bool {
         self.as_str().starts_with("video/")
+    }
+
+    /// Returns `true` if this is an audio media type.
+    pub fn is_audio(&self) -> bool {
+        self.as_str().starts_with("audio/")
     }
 }
 
@@ -399,10 +455,26 @@ fn test_media_type_extension() {
     assert_eq!(MediaType::jpeg().file_extension(), Some("jpg"));
     assert_eq!(MediaType::mp4().file_extension(), Some("mp4"));
     assert_eq!(MediaType::markdown().file_extension(), Some("md"));
+    assert_eq!(MediaType::wav().file_extension(), Some("wav"));
+    assert_eq!(MediaType::mpeg_audio().file_extension(), Some("mp3"));
+    assert_eq!(MediaType::ogg_audio().file_extension(), Some("ogg"));
+    assert_eq!(MediaType::flac().file_extension(), Some("flac"));
     assert_eq!(MediaType::plain_text().file_extension(), Some("txt"));
     assert_eq!(MediaType::png().file_extension(), Some("png"));
     assert_eq!(MediaType::rvl().file_extension(), Some("rvl"));
     assert_eq!(MediaType::stl().file_extension(), Some("stl"));
+}
+
+#[test]
+fn test_guess_from_data_wav() {
+    let mut valid_wav = b"RIFF".to_vec();
+    valid_wav.extend_from_slice(&36u32.to_le_bytes());
+    valid_wav.extend_from_slice(b"WAVEfmt ");
+
+    assert_eq!(
+        MediaType::guess_from_data(&valid_wav),
+        Some(MediaType::wav())
+    );
 }
 
 #[test]

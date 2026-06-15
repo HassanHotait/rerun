@@ -7,6 +7,7 @@ order: 4
 Views are the panels shown in the viewer's viewport and the primary means of inspecting & visualizing previously logged data. This page lists all built-in views.
 
 
+* [`AudioView`](views/audio_view.md): A view of a single audio asset, for use with [`archetypes.AssetAudio`](https://rerun.io/docs/reference/types/archetypes/asset_audio).
 * [`BarChartView`](views/bar_chart_view.md): A bar chart view.
 * [`DataframeView`](views/dataframe_view.md): A view to display any data in a tabular form.
 * [`GraphView`](views/graph_view.md): A graph view to display time-variying, directed or undirected graph visualization.

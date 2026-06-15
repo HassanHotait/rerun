@@ -1,0 +1,32 @@
+namespace rerun.archetypes;
+
+/// An audio binary.
+///
+/// The viewer shows a play button for the asset and, when possible, a waveform preview.
+///
+/// Supported values:
+/// * `audio/wav`
+/// * `audio/mpeg`
+/// * `audio/ogg`
+/// * `audio/flac`
+///
+/// \example archetypes/asset_audio missing="cpp,rs" title="Log an audio asset"
+table AssetAudio (
+  "attr.docs.category": "Audio",
+  "attr.docs.view_types": "AudioView",
+  "attr.rerun.state": "unstable",
+  "attr.rerun.visualizer_none"
+) {
+  // --- Required ---
+
+  /// The asset's bytes.
+  blob: rerun.components.Blob ("attr.rerun.component_required", "attr.rerun.component_no_ui_edit", order: 1000);
+
+  // --- Recommended ---
+
+  /// The Media Type of the asset.
+  ///
+  /// If omitted, the viewer will try to guess from the data blob.
+  /// If it cannot guess, the asset will still be downloadable but playback may not be available.
+  media_type: rerun.components.MediaType ("attr.rerun.component_recommended", nullable, order: 2000);
+}

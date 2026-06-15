@@ -11,6 +11,7 @@ use re_viewer_context::{AppContext, StoreViewContext, UiLayout};
 
 mod annotation_context_ui;
 mod app_id_ui;
+mod audio_ui;
 mod blob_ui;
 mod component_path_ui;
 mod component_type_ui;
