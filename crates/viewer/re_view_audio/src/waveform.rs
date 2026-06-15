@@ -4,7 +4,7 @@ use re_ui::UiExt as _;
 pub struct WavWaveform {
     pub sample_rate: u32,
     pub channels: u16,
-    pub peaks: Vec<f32>,
+    pub samples: Vec<f32>,
     pub sample_count: usize,
 }
 
@@ -56,32 +56,22 @@ impl WavWaveform {
         let frame_count = data.len() / frame_size;
         let bucket_count = frame_count.clamp(1, 2048);
         let frames_per_bucket = frame_count.div_ceil(bucket_count).max(1);
-        let mut peaks = Vec::with_capacity(bucket_count);
+        let mut samples = Vec::with_capacity(bucket_count);
 
         for bucket_start_frame in (0..frame_count).step_by(frames_per_bucket) {
             let bucket_end_frame = (bucket_start_frame + frames_per_bucket).min(frame_count);
-            let mut peak = 0.0f32;
-
-            for frame_index in bucket_start_frame..bucket_end_frame {
-                let frame_start = frame_index * frame_size;
-                for channel in 0..usize::from(format.channels) {
-                    let sample_start = frame_start + channel * bytes_per_sample;
-                    let sample = decode_wav_sample(
-                        &data[sample_start..sample_start + bytes_per_sample],
-                        format.audio_format,
-                        format.bits_per_sample,
-                    )?;
-                    peak = peak.max(sample.abs());
-                }
-            }
-
-            peaks.push(peak.at_most(1.0));
+            let frame_index = (bucket_start_frame + bucket_end_frame) / 2;
+            samples.push(
+                decode_wav_frame_sample(data, frame_index, frame_size, bytes_per_sample, &format)?
+                    .abs()
+                    .at_most(1.0),
+            );
         }
 
         Some(Self {
             sample_rate: format.sample_rate,
             channels: format.channels,
-            peaks,
+            samples,
             sample_count: frame_count,
         })
     }
@@ -124,6 +114,28 @@ fn decode_wav_sample(bytes: &[u8], audio_format: u16, bits_per_sample: u16) -> O
     }
 }
 
+fn decode_wav_frame_sample(
+    data: &[u8],
+    frame_index: usize,
+    frame_size: usize,
+    bytes_per_sample: usize,
+    format: &WavFormat,
+) -> Option<f32> {
+    let frame_start = frame_index * frame_size;
+    let mut sample_sum = 0.0f32;
+
+    for channel in 0..usize::from(format.channels) {
+        let sample_start = frame_start + channel * bytes_per_sample;
+        sample_sum += decode_wav_sample(
+            &data[sample_start..sample_start + bytes_per_sample],
+            format.audio_format,
+            format.bits_per_sample,
+        )?;
+    }
+
+    Some(sample_sum / f32::from(format.channels))
+}
+
 pub fn waveform_ui(
     ui: &mut egui::Ui,
     waveform: &WavWaveform,
@@ -141,16 +153,20 @@ pub fn waveform_ui(
         Stroke::new(1.0, ui.visuals().weak_text_color()),
     );
 
-    if !waveform.peaks.is_empty() {
+    if !waveform.samples.is_empty() {
         let color = Color32::from_rgb(82, 168, 255);
-        let width = rect.width();
         let center_y = rect.center().y;
         let half_height = rect.height() * 0.42;
+        let bar_spacing = 6.0;
+        let bar_count =
+            ((rect.width() / bar_spacing).floor() as usize).clamp(1, waveform.samples.len());
 
-        for (index, peak) in waveform.peaks.iter().enumerate() {
-            let x = rect.left() + width * (index as f32 + 0.5) / waveform.peaks.len() as f32;
-            let y = half_height * peak;
-            painter.vline(x, center_y - y..=center_y + y, Stroke::new(1.0, color));
+        for index in 0..bar_count {
+            let sample_index = index * waveform.samples.len() / bar_count;
+            let amplitude = waveform.samples[sample_index];
+            let x = rect.left() + rect.width() * (index as f32 + 0.5) / bar_count as f32;
+            let y = (half_height * amplitude).at_least(2.0);
+            painter.vline(x, center_y - y..=center_y + y, Stroke::new(2.0, color));
         }
     }
 
