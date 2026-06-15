@@ -15,6 +15,18 @@ pixi run uvpy examples/python/audio_asset/audio_asset.py
 Press Play in the audio viewport to hear the asset through the native audio output.
 The waveform cursor advances while the asset is playing.
 
+To save the recording as an `.rrd` file:
+
+```powershell
+pixi run uvpy examples/python/audio_asset/audio_asset.py --save examples/python/audio_asset/audio_asset.rrd
+```
+
+To open the saved file with the locally built viewer:
+
+```powershell
+target\debug\rerun.exe examples/python/audio_asset/audio_asset.rrd
+```
+
 To use an already-running viewer:
 
 ```powershell

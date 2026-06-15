@@ -45,6 +45,12 @@ def main() -> None:
         default=None,
         help="Path to a local rerun viewer executable to spawn.",
     )
+    parser.add_argument(
+        "--save",
+        type=Path,
+        default=None,
+        help="Save the recording to this .rrd file instead of spawning a viewer.",
+    )
     args = parser.parse_args()
 
     if not hasattr(rr.archetypes, "AssetAudio"):
@@ -58,8 +64,15 @@ def main() -> None:
             "Run `pixi run codegen` and then `pixi run py-build` from the repository root."
         )
 
+    blueprint = rrb.Blueprint(
+        rrb.AudioView(origin="/audio/sine_440hz", name="Audio waveform"),
+        rrb.TimeSeriesView(origin="/timeline", name="Sample timeline"),
+    )
+
     rr.init("rerun_example_audio_asset")
-    if args.connect:
+    if args.save is not None:
+        rr.save(args.save, default_blueprint=blueprint)
+    elif args.connect:
         rr.connect_grpc()
     else:
         repo_root = Path(__file__).resolve().parents[3]
@@ -69,12 +82,8 @@ def main() -> None:
 
     audio_bytes = make_sine_wav()
 
-    rr.send_blueprint(
-        rrb.Blueprint(
-            rrb.AudioView(origin="/audio/sine_440hz", name="Audio waveform"),
-            rrb.TimeSeriesView(origin="/timeline", name="Sample timeline"),
-        )
-    )
+    if args.save is None:
+        rr.send_blueprint(blueprint)
 
     rr.log(
         "audio/sine_440hz",
@@ -85,6 +94,10 @@ def main() -> None:
     for sample_index in range(20):
         rr.set_time("sample", sequence=sample_index)
         rr.log("timeline/sample_index", rr.Scalars(sample_index))
+
+    if args.save is not None:
+        rr.disconnect()
+        print(f"Saved recording to {args.save}")
 
 
 if __name__ == "__main__":
