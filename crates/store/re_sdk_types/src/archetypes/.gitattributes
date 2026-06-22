@@ -7,6 +7,7 @@ arrows3d.rs linguist-generated=true
 asset3d.rs linguist-generated=true
 asset_audio.rs linguist-generated=true
 asset_video.rs linguist-generated=true
+audio_stream.rs linguist-generated=true
 bar_chart.rs linguist-generated=true
 boxes2d.rs linguist-generated=true
 boxes3d.rs linguist-generated=true

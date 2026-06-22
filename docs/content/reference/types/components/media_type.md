@@ -28,6 +28,7 @@ Utf8
 * [`Asset3D`](../archetypes/asset3d.md)
 * [`AssetAudio`](../archetypes/asset_audio.md)
 * [`AssetVideo`](../archetypes/asset_video.md)
+* [`AudioStream`](../archetypes/audio_stream.md)
 * [`EncodedDepthImage`](../archetypes/encoded_depth_image.md)
 * [`EncodedImage`](../archetypes/encoded_image.md)
 * [`TextDocument`](../archetypes/text_document.md)

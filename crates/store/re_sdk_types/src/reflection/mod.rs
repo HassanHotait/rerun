@@ -1762,6 +1762,31 @@ fn generate_archetype_reflection() -> ArchetypeReflectionMap {
             },
         ),
         (
+            ArchetypeName::new("rerun.archetypes.AudioStream"),
+            ArchetypeReflection {
+                display_name: "Audio stream",
+                deprecation_summary: None,
+                scope: None,
+                view_types: &["AudioView"],
+                fields: vec![
+                    ArchetypeFieldReflection {
+                        name: "chunk",
+                        display_name: "Chunk",
+                        component_type: "rerun.components.Blob".into(),
+                        docstring_md: "A self-contained audio chunk whose start time is the current timeline timestamp.",
+                        flags: ArchetypeFieldFlags::REQUIRED,
+                    },
+                    ArchetypeFieldReflection {
+                        name: "media_type",
+                        display_name: "Media type",
+                        component_type: "rerun.components.MediaType".into(),
+                        docstring_md: "The Media Type of the chunk.\n\nIf omitted, the viewer will try to guess it from the chunk contents.",
+                        flags: ArchetypeFieldFlags::UI_EDITABLE,
+                    },
+                ],
+            },
+        ),
+        (
             ArchetypeName::new("rerun.archetypes.BarChart"),
             ArchetypeReflection {
                 display_name: "Bar chart",

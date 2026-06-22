@@ -13,6 +13,7 @@ This page lists all built-in archetypes.
 ## Audio
 
 * [`AssetAudio`](archetypes/asset_audio.md): An audio binary.
+* [`AudioStream`](archetypes/audio_stream.md): A timeline-synchronized stream of self-contained audio chunks.
 
 ## Geospatial
 

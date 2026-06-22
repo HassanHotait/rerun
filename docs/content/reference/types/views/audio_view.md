@@ -14,3 +14,4 @@ A view of a single audio asset, for use with [`archetypes.AssetAudio`](https://r
 ## Visualized archetypes
 
 * [`AssetAudio`](../archetypes/asset_audio.md)
+* [`AudioStream`](../archetypes/audio_stream.md)

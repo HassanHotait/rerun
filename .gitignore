@@ -67,6 +67,7 @@ screenshot*.png
 
 # Saved example `.rrd` files
 example_data
+/*.rrd
 
 # Various builds
 dist

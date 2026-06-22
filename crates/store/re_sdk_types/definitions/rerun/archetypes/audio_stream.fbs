@@ -1,0 +1,36 @@
+namespace rerun.archetypes;
+
+/// A timeline-synchronized stream of self-contained audio chunks.
+///
+/// Log each chunk at the main timeline timestamp where it starts playing.
+/// Chunks do not need to be contiguous: intervals without a chunk are treated as interruptions
+/// and remain silent in the viewer.
+///
+/// The initial implementation supports uncompressed WAV chunks.
+/// Each chunk must be independently decodable so playback can seek after a timeline jump or gap.
+/// Do not log stream chunks as static data.
+///
+/// \example archetypes/audio_stream missing="cpp,rs" title="Log an interrupted audio stream"
+table AudioStream (
+  "attr.docs.category": "Audio",
+  "attr.docs.view_types": "AudioView",
+  "attr.rerun.state": "unstable",
+  "attr.rerun.visualizer": "AudioStream"
+) {
+  // --- Required ---
+
+  /// A self-contained audio chunk whose start time is the current timeline timestamp.
+  chunk: rerun.components.Blob ("attr.rerun.component_required", "attr.rerun.component_no_ui_edit", order: 1000);
+
+  // --- Recommended ---
+
+  /// The Media Type of the chunk.
+  ///
+  /// If omitted, the viewer will try to guess it from the chunk contents.
+  media_type: rerun.components.MediaType ("attr.rerun.component_recommended", nullable, order: 2000);
+
+  // --- Optional ---
+
+  /// The source filename of this audio chunk.
+  filename: rerun.components.Text ("attr.rerun.component_optional", nullable, order: 3000);
+}

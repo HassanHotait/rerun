@@ -1,6 +1,7 @@
 use egui::{Color32, NumExt as _, Stroke, Vec2};
 use re_ui::UiExt as _;
 
+#[derive(Clone, Debug)]
 pub struct WavWaveform {
     pub sample_rate: u32,
     pub channels: u16,

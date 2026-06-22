@@ -137,6 +137,9 @@ pub struct BlobUi {
 
     /// The media type of the blob if known (used to inform image and video uis).
     media_type: Option<MediaType>,
+
+    /// Source filename for an `AudioStream` chunk, if logged.
+    filename: Option<components::Text>,
 }
 
 impl BlobUi {
@@ -163,6 +166,16 @@ impl BlobUi {
         )
         .or_else(|| components::MediaType::guess_from_data(&blob));
 
+        let filename = (blob_descr.archetype
+            == archetypes::AudioStream::descriptor_chunk().archetype)
+            .then(|| {
+                find_and_deserialize_archetype_mono_component::<components::Text>(
+                    components,
+                    blob_descr.archetype,
+                )
+            })
+            .flatten();
+
         // Video timestamp is only relevant here if it comes from a VideoFrameReference archetype.
         // It doesn't show up in the blob's archetype.
         let video_timestamp_descr = archetypes::VideoFrameReference::descriptor_timestamp();
@@ -179,7 +192,7 @@ impl BlobUi {
             })
             .flatten();
 
-        Some(Self::new(
+        let mut blob_ui = Self::new(
             ctx,
             entity_path,
             blob_descr,
@@ -187,7 +200,9 @@ impl BlobUi {
             blob.0,
             media_type.as_ref(),
             video_timestamp,
-        ))
+        );
+        blob_ui.filename = filename;
+        Some(blob_ui)
     }
 
     pub fn new(
@@ -222,6 +237,7 @@ impl BlobUi {
             component: blob_component_descriptor.component,
             blob,
             media_type: media_type.cloned(),
+            filename: None,
         }
     }
 
@@ -260,6 +276,14 @@ impl BlobUi {
         ui_layout: UiLayout,
         _entity_path: &EntityPath,
     ) {
+        if ui_layout == UiLayout::SelectionPanel
+            && let Some(filename) = &self.filename
+        {
+            ui.list_item_flat_noninteractive(
+                PropertyContent::new("Filename").value_text(filename.0.as_str()),
+            );
+        }
+
         if let (Some(row_id), Some(media_type)) = (self.row_id, self.media_type.as_ref())
             && ui_layout == UiLayout::SelectionPanel
             && media_type.is_image()

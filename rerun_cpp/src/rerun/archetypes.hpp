@@ -8,6 +8,7 @@
 #include "archetypes/asset3d.hpp"
 #include "archetypes/asset_audio.hpp"
 #include "archetypes/asset_video.hpp"
+#include "archetypes/audio_stream.hpp"
 #include "archetypes/bar_chart.hpp"
 #include "archetypes/boxes2d.hpp"
 #include "archetypes/boxes3d.hpp"
